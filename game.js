@@ -35,8 +35,8 @@ const Gameboard = (() => {
       if (board[a] === board[b] && board[b] === board[c]) {
         return board[a];
       }
-      return false;
     }
+    return null;
   };
 
   return { board, placeMarker, checkWin };
