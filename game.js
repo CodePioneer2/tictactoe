@@ -1,65 +1,110 @@
 const Gameboard = (() => {
-  const board = Array(9).fill(null);
+  const board = [];
 
-  board[0] = 'X';
-  board[1] = 'X';
-  board[2] = 'X';
+  // dynamic size
+  const boardSize = 9;
 
-  const placeMarker = (index, marker) => {
-    if (board[index] === null) {
+  // display in console
+  const drawBoard = () => {
+    console.log(board);
+  };
+
+  // updating board:
+  const startBoard = () => {
+    for (let i = 1; i <= boardSize; i++) {
+      board.push('');
+    }
+  };
+
+  const markBoard = (index, marker) => {
+    if (board[index] === '') {
       board[index] = marker;
-      return true;
+      return;
     }
     return false;
   };
 
-  const clearBoard = () => {
-    board = Array(9).fill(null);
-  };
-
-  const checkWin = () => {
-    const winCombos = [
-      [0, 1, 2],
-      [3, 4, 5],
+  // board win logic:
+  const checkWinner = () => {
+    const winConditions = [
+      [0, 1, 2], // top row
+      [3, 4, 6],
       [6, 7, 8],
-      [0, 3, 6],
+      [0, 3, 6], // left column
       [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
+      [2, 6, 8],
+      [0, 4, 8], // lastly: diagonals
       [2, 4, 6],
     ];
 
-    for (const combo of winCombos) {
-      [a, b, c] = combo;
-
-      if (board[a] === board[b] && board[b] === board[c]) {
+    winConditions.forEach((row, index) => {
+      const [a, b, c] = row;
+      if (board[a] !== '' && board[a] === board[b] && board[b] === board[c]) {
         return board[a];
       }
-    }
+    });
     return null;
   };
 
-  return { board, placeMarker, checkWin };
+  const checkTie = () => {
+    if (board.includes('')) {
+      return false;
+    }
+    return true;
+  };
+
+  return { drawBoard, startBoard, markBoard, checkWinner, checkTie };
 })();
 
-// Player Object
-const Player = (name, marker) => {
-  name, marker;
+const Players = (name, marker) => {
+  return { name, marker };
 };
 
-// Game object
 const Game = (() => {
-  const player1 = Player('Player 1', 'X');
-  const player2 = Player('Player 2', 'X');
-  const board = Gameboard.board;
+  const player1 = Players('Player 1', 'X');
+  const player2 = Players('Player 2', 'Y');
+  let currentPlayer = player1;
+  let gameover = false;
+  let winner = null;
+  let tie = null;
 
   const startGame = () => {
-    console.log(board);
+    Gameboard.startBoard();
+
+    while (!gameover) {
+      playTurn();
+      Gameboard.drawBoard();
+      winner = Gameboard.checkWinner();
+      tie = Gameboard.checkTie();
+      currentPlayer = switchPlayer();
+      if (winner !== null) {
+        return gameOver(winner);
+      }
+      if (tie) {
+        return gameOver(tie);
+      }
+    }
   };
 
-  return {
-    startGame,
+  const switchPlayer = () => {
+    return currentPlayer === player1 ? player2 : player1;
   };
+
+  const playTurn = () => {
+    let index = 0;
+    do {
+      index = prompt('Choose index of marker');
+    } while (isNaN(index) || index === '' || index < 0 || index > 8);
+    Gameboard.markBoard(index, currentPlayer.marker);
+  };
+
+  const gameOver = (result) => {
+    if (result === 'X' || result === 'Y') {
+      console.log(`Winner is ${result}`);
+    } else {
+      console.log("It's tie!");
+    }
+  };
+
+  return { startGame };
 })();
-
-Game.startGame();
